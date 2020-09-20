@@ -83,15 +83,20 @@ add_packages <- function(packages, repository,
       setdiff(packages, c(package_names, package_dirs))
     )
 
+  added_package_names <- c()
+  added_package_dirs <- c()
+
   if (length(package_names) > 0)
-    add_packages_by_name(package_names, repository, available_packages,
-                         compile, quiet)
+    added_package_names <- add_packages_by_name(
+      package_names, repository, available_packages, compile, quiet
+    )
 
   if (length(package_dirs) > 0)
-    add_package_dirs(package_dirs, repository, available_packages, compile,
-                     quiet)
+    added_package_dirs <- add_package_dirs(
+      package_dirs, repository, available_packages, compile, quiet
+    )
 
-  invisible()
+  invisible(c(added_package_names, added_package_dirs))
 }
 
 is_package_name <- function(package, clean_avail_pkgs) {
