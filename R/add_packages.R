@@ -9,6 +9,17 @@ NULL
 #' \code{available.packages()}
 NULL
 
+#' Compile Packages
+#' @name compile-param
+#' @param compile boolean - whether or not to compile binary packages. Default
+#' TRUE
+NULL
+
+#' Quiet Output
+#' @name quiet-param
+#' @param quiet boolean, TRUE silences output.
+NULL
+
 #' Compile Packages and Add to CRAN Repository
 #'
 #' For a vector of package names and package directories, a path to a directory
@@ -17,12 +28,13 @@ NULL
 #' @param packages A character vector of package names or package directories
 #' @inheritParams repository-param
 #' @inheritParams available_packages-param
-#' @param quiet boolean, TRUE silences output.
+#' @inheritParams compile-param
+#' @inheritParams quiet-param
 #'
 #' @export
 add_packages <- function(packages, repository,
                          available_packages = available.packages(),
-                         quiet = TRUE) {
+                         compile = TRUE, quiet = TRUE) {
   zips <- grepl("[.]zip$", packages)
   tars <- grepl("[.](tar[.]gz|tgz)$", packages)
   package_names <- packages[!(zips | tars)]
@@ -72,10 +84,12 @@ add_packages <- function(packages, repository,
     )
 
   if (length(package_names) > 0)
-    add_packages_by_name(package_names, repository, available_packages, quiet)
+    add_packages_by_name(package_names, repository, available_packages,
+                         compile, quiet)
 
   if (length(package_dirs) > 0)
-    add_package_dirs(package_dirs, repository, available_packages, quiet)
+    add_package_dirs(package_dirs, repository, available_packages, compile,
+                     quiet)
 
   invisible()
 }
@@ -90,7 +104,7 @@ is_package_dir <- function(package) {
 
 add_packages_by_name <- function(packages, repository,
                                  available_packages = available.packages(),
-                                 quiet = TRUE) {
+                                 compile = TRUE, quiet = TRUE) {
   repository <- normalizePath(repository)
 
   if (!is_CRAN_repo_dir(repository))
@@ -129,12 +143,12 @@ add_packages_by_name <- function(packages, repository,
   stopifnot(all(untar_results == 0))
 
   add_package_dirs(dir(untar_dir, full.names = TRUE), repository,
-                   available_packages, quiet)
+                   available_packages, compile, quiet)
 }
 
 add_package_dirs <- function(package_dirs, repository,
                              available_packages = available.packages(),
-                             quiet = TRUE) {
+                             compile = TRUE, quiet = TRUE) {
   on.exit(unlink(package_dirs, recursive = TRUE))
 
   repository <- normalizePath(repository)
@@ -198,10 +212,10 @@ add_package_dirs <- function(package_dirs, repository,
 
   package_names <- get_DESCRIPTION_package_name(package_dirs)
 
-  built_packages <- build_package(package_dirs, package_names, quiet)
+  built_packages <- build_package(package_dirs, package_names, compile, quiet)
 
   built_dependencies <- build_package(
-    downloaded_packages[, 2], downloaded_packages[, 1], quiet
+    downloaded_packages[, 2], downloaded_packages[, 1], compile, quiet
   )
 
   move_to_repo(c(built_packages, built_dependencies), repository)

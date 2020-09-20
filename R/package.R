@@ -1,4 +1,5 @@
-build_package <- function(package_dirs, package_names, quiet = TRUE) {
+build_package <- function(package_dirs, package_names, compile = TRUE,
+                          quiet = TRUE) {
   if (!(length(package_dirs) > 0))
     return(NULL)
 
@@ -21,9 +22,11 @@ build_package <- function(package_dirs, package_names, quiet = TRUE) {
 
     if (!quiet) cat("Building", package_name)
 
+    build_flag <- ifelse(compile, "--build", NULL)
+
     build_output <- system2(
       command = file.path(Sys.getenv("R_HOME"), "bin", "R"),
-      args = c("CMD", "INSTALL", "--build", package_dir),
+      args = c("CMD", "INSTALL", build_flag, package_dir),
       stdout = TRUE, stderr = TRUE
     )
 
