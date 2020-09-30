@@ -48,9 +48,11 @@ add_packages <- function(packages, repository,
     tf <- tempfile()
 
     suppressWarnings(
-      withCallingHandlers(
+      tryCatch(
         download.file(url, tf),
-        warning = function(w) stop(w)
+        warning = function(w) {
+          stop(w$message)
+        }
       )
     )
 
@@ -60,9 +62,11 @@ add_packages <- function(packages, repository,
   sapply(tar_packages, function(url) {
     tf <- tempfile()
     suppressWarnings(
-      withCallingHandlers(
+      tryCatch(
         download.file(url, tf),
-        warning = function(w) stop(w)
+        warning = function(w) {
+          stop(w$message)
+        }
       )
     )
 
@@ -169,7 +173,7 @@ add_package_dirs <- function(package_dirs, repository,
   if (
     length(filter_installed(existing_dependencies, available_packages)) > 0
   ) {
-    withCallingHandlers(
+    tryCatch(
       install.packages(
         filter_installed(existing_dependencies, available_packages),
         repos = paste0("file://", normalizePath(repository)),
@@ -177,13 +181,15 @@ add_package_dirs <- function(package_dirs, repository,
         quiet = quiet,
         type = "source"
       ),
-      warning = stop
+      warning = function(w) {
+        stop(w$message)
+      }
     )
   }
 
   if (length(filter_installed(new_dependencies, available_packages)) > 0) {
     contrib_urls <- unique(available_packages[, "Repository"])
-    withCallingHandlers(
+    tryCatch(
       install.packages(
         filter_installed(new_dependencies, available_packages),
         available = available_packages,
@@ -193,14 +199,18 @@ add_package_dirs <- function(package_dirs, repository,
         quiet = quiet,
         type = "source"
       ),
-      warning = stop
+      warning = function(w) {
+        stop(w$message)
+      }
     )
   }
 
-  withCallingHandlers(
+  tryCatch(
     lapply(package_dirs, install.packages, repos = NULL, type = "source",
            verbose = FALSE, quiet = quiet),
-    warning = function(w) stop(w)
+    warning = function(w) {
+      stop(w$message)
+    }
   )
 
   download_dir <- get_tempdir("CRANpiled-downloaded-dependencies")

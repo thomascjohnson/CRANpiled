@@ -38,7 +38,8 @@ build_package <- function(package_dirs, package_names, compile = TRUE,
     tryCatch({
       get_built_tarball(package_name, built_package_dir)
     }, error = function(e) {
-      stop("Error building ", package_name, "\nBuild output:\n", build_output)
+      stop("Error building ", package_name, "\nBuild output:\n", build_output,
+           "\nError message: ", e)
     })
   })
 
