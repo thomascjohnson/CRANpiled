@@ -137,6 +137,7 @@ archive_packages <- function(package_tarballs, repository_dir) {
           )
 
           file.copy(contrib_tarball, archive_tarball_path)
+          file.remove(contrib_tarball)
         } else if (version_comparison == -1) {
           archive_tarball_path <- file.path(
             package_archive_dir,
